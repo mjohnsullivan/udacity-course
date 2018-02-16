@@ -113,15 +113,13 @@ class _CategoryRouteState extends State<CategoryRoute> {
     final json =
         DefaultAssetBundle.of(context).loadString('assets/regular_units.json');
     final decoder = JsonDecoder();
-    Map<String, List<Map<String, dynamic>>> data = decoder.convert(await json);
+    final data = decoder.convert(await json);
+
     var ci = 0;
     for (var key in data.keys) {
       final units = <Unit>[];
       for (var i = 0; i < data[key].length; i++) {
-        units.add(Unit(
-          name: data[key][i]['name'],
-          conversion: data[key][i]['conversion'],
-        ));
+        units.add(Unit.fromJson(data[key][i]));
       }
       setState(() {
         _categories.add(Category(

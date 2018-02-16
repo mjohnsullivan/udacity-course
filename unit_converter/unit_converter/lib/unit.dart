@@ -15,4 +15,8 @@ class Unit {
   })
       : assert(name != null),
         assert(conversion != null);
+
+  Unit.fromJson(Map jsonMap) :
+    name = jsonMap['name'],
+    conversion = jsonMap['conversion'];
 }
