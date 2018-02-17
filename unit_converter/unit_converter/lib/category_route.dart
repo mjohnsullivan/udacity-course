@@ -109,7 +109,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
   }
 
   /// Retrieves a list of [Categories] and their [Unit]s
-  Future<Null> _-retrieveLocalCategories() async {
+  Future<Null> _retrieveLocalCategories() async {
     final data = await
         DefaultAssetBundle.of(context).loadStructuredData('assets/regular_units.json', new JsonDecoder().convert);
     var ci = 0;
@@ -126,7 +126,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
   }
 
   /// Retrieves a list of [Categories] and their [Unit]s using streams
-  Future<Null> _retrieveLocalCategories() async {
+  Future<Null> __retrieveLocalCategories() async {
     final json =
         DefaultAssetBundle.of(context).loadString('assets/regular_units.json');
     var ci = 0;
