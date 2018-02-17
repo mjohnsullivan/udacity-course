@@ -110,26 +110,43 @@ class _CategoryRouteState extends State<CategoryRoute> {
 
   /// Retrieves a list of [Categories] and their [Unit]s
   Future<Null> _retrieveLocalCategories() async {
-    final json =
-        DefaultAssetBundle.of(context).loadString('assets/regular_units.json');
-    final decoder = JsonDecoder();
-    final data = decoder.convert(await json);
+    final data = await
+        DefaultAssetBundle.of(context).loadStructuredData('assets/regular_units.json', new JsonDecoder().convert);
     var ci = 0;
-    for (var key in data.keys) {
-      final units = <Unit>[];
-      for (var i = 0; i < data[key].length; i++) {
-        units.add(Unit.fromJson(data[key][i]));
-      }
+    data.forEach((key, values) {
       setState(() {
         _categories.add(Category(
           name: key,
-          units: units,
+          units: values.map((unitMap) => Unit.fromJson(unitMap)).toList(),
           color: _baseColors[ci],
-          iconLocation: _icons[ci],
+          iconLocation: _icons[ci++],
         ));
       });
-      ci += 1;
-    }
+    });
+  }
+
+  /// Retrieves a list of [Categories] and their [Unit]s using streams
+  Future<Null> _retrieveLocalCategoriesWithStreams() async {
+    final json =
+        DefaultAssetBundle.of(context).loadString('assets/regular_units.json');
+    var ci = 0;
+    var stream = json.asStream()
+      .transform(JSON.decoder)
+      .expand((jsonMap) =>
+        (jsonMap as Map).keys.map((k) => [k, (jsonMap as Map)[k]])
+      )
+      .map((groupList) =>
+        Category(
+          name: groupList[0],
+          units: groupList[1].map(
+            (unitMap) => Unit.fromJson(unitMap)).toList(),
+          color: _baseColors[ci],
+          iconLocation: _icons[ci++],
+        ),
+      );
+      await for (var category in stream) {
+        setState(() => _categories.add(category));
+      }
   }
 
   /// Retrieves a [Category] and its [Unit]s from an API on the web
