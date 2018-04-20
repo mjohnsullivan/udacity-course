@@ -32,7 +32,7 @@ class CategoryTile extends StatelessWidget {
         assert(onTap != null),
         super(key: key);
 
-  /// Navigates to the [ConverterRoute].
+  /// Navigates to the [UnitConverter].
   void _navigateToConverter(BuildContext context) {
     Navigator.of(context).push(MaterialPageRoute<Null>(
       builder: (BuildContext context) {
@@ -70,9 +70,8 @@ class CategoryTile extends StatelessWidget {
         height: _rowHeight,
         child: InkWell(
           borderRadius: _borderRadius,
-          // TODO: Use the highlight and splash colors from the ColorSwatch
-          highlightColor: category.color,
-          splashColor: category.color,
+          highlightColor: category.color['highlight'],
+          splashColor: category.color['splash'],
           // We can use either the () => function() or the () { function(); }
           // syntax.
           // TODO: This should call the onTap() passed into the constructor
@@ -88,12 +87,10 @@ class CategoryTile extends StatelessWidget {
               children: [
                 Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: category.iconLocation != null
-                      ? Icon(
-                          category.iconLocation,
-                          size: 60.0,
-                        )
-                      : null,
+                  child: Icon(
+                    category.iconLocation,
+                    size: 60.0,
+                  ),
                 ),
                 Center(
                   child: Text(

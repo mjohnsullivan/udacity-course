@@ -11,8 +11,8 @@ import 'package:unit_converter/api.dart';
 import 'package:unit_converter/backdrop.dart';
 import 'package:unit_converter/category.dart';
 import 'package:unit_converter/category_tile.dart';
-import 'package:unit_converter/unit_converter.dart';
 import 'package:unit_converter/unit.dart';
+import 'package:unit_converter/unit_converter.dart';
 
 /// Loads in unit conversion data, and displays the data.
 ///
@@ -29,6 +29,10 @@ class CategoryRoute extends StatefulWidget {
 class _CategoryRouteState extends State<CategoryRoute> {
   Category _defaultCategory;
   Category _currentCategory;
+  // Widgets are supposed to be deeply immutable objects. We can update and edit
+  // _categories as we build our app, and when we pass it into a widget's
+  // `children` property, we call .toList() on it.
+  // For more details, see https://github.com/dart-lang/sdk/issues/27755
   final _categories = <Category>[];
   static const _baseColors = <ColorSwatch>[
     ColorSwatch(0xFF6AB7A8, {
@@ -77,7 +81,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
   ];
 
   @override
-  Future<Null> didChangeDependencies() async {
+  Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
     // We have static unit conversions located in our
     // assets/data/regular_units.json
@@ -89,18 +93,10 @@ class _CategoryRouteState extends State<CategoryRoute> {
     }
   }
 
-  /// Function to call when a [Category] is tapped.
-  void _onCategoryTap(Category category) {
-    setState(() {
-      _currentCategory = category;
-    });
-  }
-
   /// Retrieves a list of [Categories] and their [Unit]s
-  Future<Null> _retrieveLocalCategories() async {
+  Future<void> _retrieveLocalCategories() async {
     // Consider omitting the types for local variables. For more details on Effective
     // Dart Usage, see https://www.dartlang.org/guides/language/effective-dart/usage
-
     final json = DefaultAssetBundle
         .of(context)
         .loadString('assets/data/regular_units.json');
@@ -109,7 +105,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
       throw ('Data retrieved from API is not a Map');
     }
     var categoryIndex = 0;
-    (data as Map).keys.forEach((key) {
+    data.keys.forEach((key) {
       final List<Unit> units =
           data[key].map<Unit>((dynamic data) => Unit.fromJson(data)).toList();
 
@@ -130,13 +126,14 @@ class _CategoryRouteState extends State<CategoryRoute> {
   }
 
   /// Retrieves a [Category] and its [Unit]s from an API on the web
-  Future<Null> _retrieveApiCategory() async {
+  Future<void> _retrieveApiCategory() async {
     // Add a placeholder while we fetch the Currency category using the API
     setState(() {
       _categories.add(Category(
         name: apiCategory['name'],
         units: [],
         color: _baseColors.last,
+        iconLocation: _icons.last,
       ));
     });
     final api = Api();
@@ -160,29 +157,33 @@ class _CategoryRouteState extends State<CategoryRoute> {
     }
   }
 
+  /// Function to call when a [Category] is tapped.
+  void _onCategoryTap(Category category) {
+    setState(() {
+      _currentCategory = category;
+    });
+  }
+
   /// Makes the correct number of rows for the list view, based on whether the
   /// device is portrait or landscape.
   ///
-  /// For portrait, we use a [ListView]
-  /// For landscape, we use a [GridView]
+  /// For portrait, we use a [ListView]. For landscape, we use a [GridView].
   Widget _buildCategoryWidgets(Orientation deviceOrientation) {
     if (deviceOrientation == Orientation.portrait) {
       return ListView.builder(
         itemBuilder: (BuildContext context, int index) {
+          var _category = _categories[index];
           return CategoryTile(
-            category: _categories[index],
-            onTap: _onCategoryTap,
+            category: _category,
+            onTap:
+                _category.name == apiCategory['name'] && _category.units.isEmpty
+                    ? null
+                    : _onCategoryTap,
           );
         },
         itemCount: _categories.length,
       );
     } else {
-      // Why do we pass in `_categories.toList()` instead of just `_categories`?
-      // Widgets are supposed to be deeply immutable objects. We're passing in
-      // _categories to this GridView, which changes as we load in each
-      // [Category]. So, each time _categories changes, we need to pass in a new
-      // list. The .toList() function does this.
-      // For more details, see https://github.com/dart-lang/sdk/issues/27755
       return GridView.count(
         crossAxisCount: 2,
         childAspectRatio: 3.0,
@@ -219,7 +220,6 @@ class _CategoryRouteState extends State<CategoryRoute> {
       ),
       child: _buildCategoryWidgets(MediaQuery.of(context).orientation),
     );
-
     return Backdrop(
       currentCategory:
           _currentCategory == null ? _defaultCategory : _currentCategory,

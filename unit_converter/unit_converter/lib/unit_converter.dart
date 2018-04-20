@@ -13,12 +13,13 @@ import 'package:unit_converter/unit.dart';
 
 const _padding = EdgeInsets.all(16.0);
 
-/// [UnitConverter] where users can input amounts to convert in one unit
-/// and retrieve the conversion in another unit
+/// [UnitConverter] where users can input amounts to convert in one [Unit]
+/// and retrieve the conversion in another [Unit] for a specific [Category].
 class UnitConverter extends StatefulWidget {
+  /// The current [Category] for unit conversion.
   final Category category;
 
-  /// This [UnitConverter] handles [Unit]s for a specific [Category].
+  /// This [UnitConverter] takes in a [Category] with [Units]. It can't be null.
   const UnitConverter({
     @required this.category,
   }) : assert(category != null);
@@ -28,14 +29,14 @@ class UnitConverter extends StatefulWidget {
 }
 
 class _UnitConverterState extends State<UnitConverter> {
-  final _inputKey = GlobalKey(debugLabel: 'inputText');
   Unit _fromValue;
   Unit _toValue;
   double _inputValue;
   String _convertedValue = '';
   List<DropdownMenuItem> _unitMenuItems;
-  bool _showErrorUI = false;
   bool _showValidationError = false;
+  final _inputKey = GlobalKey(debugLabel: 'inputText');
+  bool _showErrorUI = false;
 
   @override
   void initState() {
@@ -73,18 +74,15 @@ class _UnitConverterState extends State<UnitConverter> {
     });
   }
 
-  /// Sets the default values for the 'from' and 'to' [Dropdown]s, and the new
-  /// output value if a user had previously entered an input in a different
-  /// [Category].
+  /// Sets the default values for the 'from' and 'to' [Dropdown]s, and the
+  /// updated output value if a user had previously entered an input.
   void _setDefaults() {
     setState(() {
       _fromValue = widget.category.units[0];
       _toValue = widget.category.units[1];
     });
     if (_inputValue != null) {
-      setState(() {
-        _updateConversion();
-      });
+      _updateConversion();
     }
   }
 
@@ -104,7 +102,7 @@ class _UnitConverterState extends State<UnitConverter> {
     return outputNum;
   }
 
-  Future<Null> _updateConversion() async {
+  Future<void> _updateConversion() async {
     // Our API has a handy convert function, so we can use that for
     // the Currency [Category]
     if (widget.category.name == apiCategory['name']) {
@@ -116,11 +114,11 @@ class _UnitConverterState extends State<UnitConverter> {
         setState(() {
           _showErrorUI = true;
         });
-        return;
+      } else {
+        setState(() {
+          _convertedValue = _format(conversion);
+        });
       }
-      setState(() {
-        _convertedValue = _format(conversion);
-      });
     } else {
       // For the static units, we do the conversion ourselves
       setState(() {

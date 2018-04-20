@@ -87,8 +87,8 @@ class Category extends StatelessWidget {
         height: _rowHeight,
         child: InkWell(
           borderRadius: _borderRadius,
-          highlightColor: color,
-          splashColor: color,
+          highlightColor: color['highlight'],
+          splashColor: color['splash'],
           // We can use either the () => function() or the () { function(); }
           // syntax.
           onTap: () => _navigateToConverter(context),
@@ -103,12 +103,10 @@ class Category extends StatelessWidget {
               children: [
                 Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: iconLocation != null
-                      ? Icon(
-                          iconLocation,
-                          size: 60.0,
-                        )
-                      : null,
+                  child: Icon(
+                    iconLocation,
+                    size: 60.0,
+                  ),
                 ),
                 Center(
                   child: Text(
